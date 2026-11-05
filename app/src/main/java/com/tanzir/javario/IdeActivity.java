@@ -197,7 +197,7 @@ public class IdeActivity extends Activity {
         sym.setVisibility(Prefs.b(this, "symbol_bar") ? View.VISIBLE : View.GONE);
         if (Prefs.b(this, "keep_screen_on")) getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         else getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        tree.reload();
+        if (tree != null) tree.reload();
     }
 
     @Override protected void onResume() {
