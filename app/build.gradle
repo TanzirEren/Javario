@@ -1,0 +1,41 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.tanzir.javario'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.tanzir.javario"
+        minSdk 26
+        targetSdk 34
+        versionCode 1
+        versionName "1.0.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/LICENSE*', 'META-INF/NOTICE*', 'META-INF/DEPENDENCIES',
+                         'META-INF/*.kotlin_module', 'META-INF/MANIFEST.MF', 'META-INF/versions/**']
+        }
+    }
+}
+
+dependencies {
+    // Java compiler that runs on the phone (compiles .java -> .class)
+    implementation 'org.eclipse.jdt:ecj:3.21.0'
+    // D8 (converts .class -> .dex so the code can run on Android)
+    implementation 'com.android.tools:r8:8.1.72'
+}

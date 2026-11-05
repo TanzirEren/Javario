@@ -1,0 +1,174 @@
+# Name|Maven coordinates (space separated, first = main jar, rest = dependencies)|import prefix|Category|Description
+Gson|com.google.code.gson:gson:2.10.1|com.google.gson|JSON|Convert Java objects to JSON and back
+Jackson Core|com.fasterxml.jackson.core:jackson-core:2.16.0|com.fasterxml.jackson.core|JSON|Streaming JSON parser
+Jackson Annotations|com.fasterxml.jackson.core:jackson-annotations:2.16.0|com.fasterxml.jackson.annotation|JSON|Jackson annotations
+Jackson Databind|com.fasterxml.jackson.core:jackson-databind:2.16.0 com.fasterxml.jackson.core:jackson-core:2.16.0 com.fasterxml.jackson.core:jackson-annotations:2.16.0|com.fasterxml.jackson.databind|JSON|Object mapper for JSON
+org.json|org.json:json:20231013|org.json|JSON|Simple JSON classes
+JSON Simple|com.googlecode.json-simple:json-simple:1.1.1|org.json.simple|JSON|Tiny JSON toolkit
+SnakeYAML|org.yaml:snakeyaml:2.2|org.yaml.snakeyaml|Data|YAML parser
+SnakeYAML Engine|org.snakeyaml:snakeyaml-engine:2.7|org.snakeyaml.engine|Data|YAML 1.2 engine
+HOCON Config|com.typesafe:config:1.4.3|com.typesafe.config|Data|Typesafe config files
+TOML4J|com.moandjiezana.toml:toml4j:0.7.2 com.google.code.gson:gson:2.10.1|com.moandjiezana.toml|Data|TOML parser
+Dotenv Java|io.github.cdimascio:dotenv-java:3.0.0|io.github.cdimascio.dotenv|Data|Read .env files
+ini4j|org.ini4j:ini4j:0.5.4|org.ini4j|Data|INI file reader
+Protobuf|com.google.protobuf:protobuf-java:3.25.1|com.google.protobuf|Data|Protocol Buffers runtime
+FlatBuffers|com.google.flatbuffers:flatbuffers-java:23.5.26|com.google.flatbuffers|Data|Fast serialization
+MessagePack|org.msgpack:msgpack-core:0.9.8|org.msgpack|Data|Binary JSON-like format
+Jsoup|org.jsoup:jsoup:1.17.1|org.jsoup|HTML|Parse and scrape HTML
+JDOM2|org.jdom:jdom2:2.0.6.1|org.jdom2|XML|Easy XML handling
+dom4j|org.dom4j:dom4j:2.1.4|org.dom4j|XML|Flexible XML framework
+XOM|xom:xom:1.3.9|nu.xom|XML|Tree based XML API
+Simple XML|org.simpleframework:simple-xml:2.7.1|org.simpleframework.xml|XML|XML serialization
+Woodstox|com.fasterxml.woodstox:woodstox-core:6.6.0 org.codehaus.woodstox:stax2-api:4.2.2|com.ctc.wstx|XML|Fast StAX XML parser
+Commons Lang3|org.apache.commons:commons-lang3:3.13.0|org.apache.commons.lang3|Utility|String, number and object helpers
+Commons Lang 2|commons-lang:commons-lang:2.6|org.apache.commons.lang|Utility|Classic Commons Lang
+Commons IO|commons-io:commons-io:2.15.1|org.apache.commons.io|Utility|File and stream helpers
+Commons Collections4|org.apache.commons:commons-collections4:4.4|org.apache.commons.collections4|Utility|Extra collection types
+Commons Collections3|commons-collections:commons-collections:3.2.2|org.apache.commons.collections|Utility|Legacy collections
+Commons Math3|org.apache.commons:commons-math3:3.6.1|org.apache.commons.math3|Math|Statistics, linear algebra, optimization
+Commons Numbers Core|org.apache.commons:commons-numbers-core:1.1|org.apache.commons.numbers.core|Math|Number utilities
+Commons Codec|commons-codec:commons-codec:1.16.0|org.apache.commons.codec|Utility|Base64, hex, hashes
+Commons Text|org.apache.commons:commons-text:1.11.0 org.apache.commons:commons-lang3:3.13.0|org.apache.commons.text|Utility|Text algorithms
+Commons CSV|org.apache.commons:commons-csv:1.10.0|org.apache.commons.csv|Data|Read and write CSV
+Commons Compress|org.apache.commons:commons-compress:1.25.0|org.apache.commons.compress|Files|zip, tar, gz archives
+Commons CLI|commons-cli:commons-cli:1.6.0|org.apache.commons.cli|CLI|Command line parsing
+Commons Pool2|org.apache.commons:commons-pool2:2.12.0|org.apache.commons.pool2|Utility|Object pooling
+Commons Net|commons-net:commons-net:3.10.0|org.apache.commons.net|Network|FTP, SMTP, Telnet clients
+Commons Exec|org.apache.commons:commons-exec:1.3|org.apache.commons.exec|Utility|Run external processes
+Commons Logging|commons-logging:commons-logging:1.2|org.apache.commons.logging|Logging|Logging bridge
+Commons JEXL|org.apache.commons:commons-jexl3:3.3 commons-logging:commons-logging:1.2|org.apache.commons.jexl3|Scripting|Expression language
+Commons JXPath|commons-jxpath:commons-jxpath:1.3|org.apache.commons.jxpath|Utility|XPath for objects
+OpenCSV 2|net.sf.opencsv:opencsv:2.3|au.com.bytecode.opencsv|Data|Simple CSV reader
+Univocity Parsers|com.univocity:univocity-parsers:2.9.1|com.univocity.parsers|Data|Fast CSV/TSV parser
+Guava|com.google.guava:guava:32.1.3-jre com.google.guava:failureaccess:1.0.1|com.google.common|Utility|Google core libraries
+Eclipse Collections API|org.eclipse.collections:eclipse-collections-api:11.1.0|org.eclipse.collections.api|Utility|Collections API
+Eclipse Collections|org.eclipse.collections:eclipse-collections:11.1.0 org.eclipse.collections:eclipse-collections-api:11.1.0|org.eclipse.collections.impl|Utility|Rich collections
+fastutil|it.unimi.dsi:fastutil:8.5.12|it.unimi.dsi.fastutil|Utility|Fast primitive collections
+Trove4j|net.sf.trove4j:trove4j:3.0.3|gnu.trove|Utility|Primitive collections
+HPPC|com.carrotsearch:hppc:0.9.1|com.carrotsearch.hppc|Utility|High performance primitive collections
+RoaringBitmap|org.roaringbitmap:RoaringBitmap:1.0.0|org.roaringbitmap|Utility|Compressed bitmaps
+Caffeine|com.github.ben-manes.caffeine:caffeine:3.1.8|com.github.benmanes.caffeine|Cache|High performance cache
+ExpiringMap|net.jodah:expiringmap:0.5.11|net.jodah.expiringmap|Cache|Map with expiring entries
+JCTools|org.jctools:jctools-core:4.0.1|org.jctools|Concurrency|Concurrent data structures
+Disruptor|com.lmax:disruptor:3.4.4|com.lmax.disruptor|Concurrency|Ring buffer messaging
+Failsafe|dev.failsafe:failsafe:3.3.2|dev.failsafe|Concurrency|Retry and circuit breaker
+Vavr|io.vavr:vavr:0.10.4 io.vavr:vavr-match:0.10.4|io.vavr|Functional|Functional programming for Java
+StreamEx|one.util:streamex:0.8.2|one.util.streamex|Functional|Enhanced Java streams
+jOOL|org.jooq:jool:0.9.15|org.jooq.lambda|Functional|Useful lambda helpers
+Stream (annimon)|com.annimon:stream:1.2.2|com.annimon.stream|Functional|Streams for Java 7+
+Functional Java|org.functionaljava:functionaljava:5.0|fj|Functional|Functional programming library
+Reactive Streams|org.reactivestreams:reactive-streams:1.0.4|org.reactivestreams|Reactive|Reactive Streams API
+RxJava 3|io.reactivex.rxjava3:rxjava:3.1.8 org.reactivestreams:reactive-streams:1.0.4|io.reactivex.rxjava3|Reactive|Reactive extensions
+RxJava 2|io.reactivex.rxjava2:rxjava:2.2.21 org.reactivestreams:reactive-streams:1.0.4|io.reactivex|Reactive|Reactive extensions v2
+Reactor Core|io.projectreactor:reactor-core:3.5.11 org.reactivestreams:reactive-streams:1.0.4|reactor.core|Reactive|Reactive programming
+OkHttp|com.squareup.okhttp3:okhttp:4.12.0 com.squareup.okio:okio-jvm:3.6.0 org.jetbrains.kotlin:kotlin-stdlib:1.9.10 org.jetbrains:annotations:13.0|okhttp3|Network|HTTP client
+Okio|com.squareup.okio:okio-jvm:3.6.0 org.jetbrains.kotlin:kotlin-stdlib:1.9.10 org.jetbrains:annotations:13.0|okio|Network|Fast I/O
+Retrofit|com.squareup.retrofit2:retrofit:2.9.0 com.squareup.okhttp3:okhttp:4.12.0 com.squareup.okio:okio-jvm:3.6.0 org.jetbrains.kotlin:kotlin-stdlib:1.9.10 org.jetbrains:annotations:13.0|retrofit2|Network|Type-safe REST client
+Moshi|com.squareup.moshi:moshi:1.15.0 com.squareup.okio:okio-jvm:3.6.0 org.jetbrains.kotlin:kotlin-stdlib:1.9.10 org.jetbrains:annotations:13.0|com.squareup.moshi|JSON|Modern JSON library
+Apache HttpClient 4|org.apache.httpcomponents:httpclient:4.5.14 org.apache.httpcomponents:httpcore:4.4.16 commons-logging:commons-logging:1.2 commons-codec:commons-codec:1.16.0|org.apache.http|Network|HTTP client
+Java-WebSocket|org.java-websocket:Java-WebSocket:1.5.4 org.slf4j:slf4j-api:2.0.9|org.java_websocket|Network|WebSocket client and server
+NanoHTTPD|org.nanohttpd:nanohttpd:2.3.1|fi.iki.elonen|Network|Tiny web server
+JSch|com.jcraft:jsch:0.1.55|com.jcraft.jsch|Network|SSH2 client
+JZlib|com.jcraft:jzlib:1.1.3|com.jcraft.jzlib|Files|zlib in pure Java
+Paho MQTT|org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5|org.eclipse.paho.client.mqttv3|Network|MQTT messaging client
+RabbitMQ Client|com.rabbitmq:amqp-client:5.20.0 org.slf4j:slf4j-api:2.0.9|com.rabbitmq.client|Network|AMQP message broker client
+JavaMail|com.sun.mail:javax.mail:1.6.2 javax.activation:activation:1.1.1|javax.mail|Network|Send and read email
+SLF4J API|org.slf4j:slf4j-api:2.0.9|org.slf4j|Logging|Logging facade
+SLF4J Simple|org.slf4j:slf4j-simple:2.0.9 org.slf4j:slf4j-api:2.0.9|org.slf4j.simple|Logging|Simple logger
+Log4j API|org.apache.logging.log4j:log4j-api:2.22.0|org.apache.logging.log4j|Logging|Log4j 2 API
+Log4j Core|org.apache.logging.log4j:log4j-core:2.22.0 org.apache.logging.log4j:log4j-api:2.22.0|org.apache.logging.log4j.core|Logging|Log4j 2 implementation
+Logback|ch.qos.logback:logback-classic:1.4.14 ch.qos.logback:logback-core:1.4.14 org.slf4j:slf4j-api:2.0.9|ch.qos.logback|Logging|Logback logger
+Tinylog|org.tinylog:tinylog-api:2.6.2 org.tinylog:tinylog-impl:2.6.2|org.tinylog|Logging|Light logging framework
+JUnit 4|junit:junit:4.13.2 org.hamcrest:hamcrest-core:1.3|org.junit|Testing|Unit testing
+JUnit Jupiter API|org.junit.jupiter:junit-jupiter-api:5.10.1 org.opentest4j:opentest4j:1.3.0 org.junit.platform:junit-platform-commons:1.10.1 org.apiguardian:apiguardian-api:1.1.2|org.junit.jupiter|Testing|JUnit 5 API
+Hamcrest|org.hamcrest:hamcrest:2.2|org.hamcrest|Testing|Matchers for tests
+Awaitility|org.awaitility:awaitility:4.2.0 org.hamcrest:hamcrest:2.2|org.awaitility|Testing|Wait for async results
+EJML|org.ejml:ejml-core:0.43.1 org.ejml:ejml-ddense:0.43.1|org.ejml|Math|Matrix library
+JAMA|gov.nist.math:jama:1.0.3|Jama|Math|Basic linear algebra
+Colt|colt:colt:1.2.0|cern.colt|Math|Scientific computing
+OjAlgo|org.ojalgo:ojalgo:51.4.1|org.ojalgo|Math|Optimization and linear algebra
+JOML|org.joml:joml:1.10.5|org.joml|Math|Vectors and matrices for graphics
+JGraphT|org.jgrapht:jgrapht-core:1.5.2 org.jheaps:jheaps:0.14 org.apfloat:apfloat:1.10.1|org.jgrapht|Algorithms|Graph theory and algorithms
+JHeaps|org.jheaps:jheaps:0.14|org.jheaps|Algorithms|Heap data structures
+Jenetics|io.jenetics:jenetics:6.3.0|io.jenetics|Algorithms|Genetic algorithms
+JBox2D|org.jbox2d:jbox2d-library:2.2.1.1|org.jbox2d|Games|2D physics engine
+JTS Topology|org.locationtech.jts:jts-core:1.19.0|org.locationtech.jts|Geo|Geometry operations
+Spatial4j|org.locationtech.spatial4j:spatial4j:0.8|org.locationtech.spatial4j|Geo|Spatial shapes and distances
+GeoHash|ch.hsr:geohash:1.4.0|ch.hsr.geohash|Geo|Geohash encoding
+Exp4j|net.objecthunter:exp4j:0.4.8|net.objecthunter.exp4j|Math|Evaluate math expressions
+mXparser|org.mariuszgromada.math:MathParser.org-mXparser:5.2.1|org.mariuszgromada.math.mxparser|Math|Math expression parser
+Joda-Time|joda-time:joda-time:2.12.5|org.joda.time|Date|Date and time library
+Joda-Money|org.joda:joda-money:1.0.4|org.joda.money|Date|Money and currency
+ThreeTen Backport|org.threeten:threetenbp:1.6.8|org.threeten.bp|Date|java.time backport
+ThreeTen Extra|org.threeten:threeten-extra:1.7.2|org.threeten.extra|Date|Extra java.time classes
+PrettyTime|org.ocpsoft.prettytime:prettytime:5.0.7.Final|org.ocpsoft.prettytime|Date|Human readable time
+ICU4J|com.ibm.icu:icu4j:73.2|com.ibm.icu|Text|Unicode and internationalization
+libphonenumber|com.googlecode.libphonenumber:libphonenumber:8.13.26|com.google.i18n.phonenumbers|Text|Phone number parsing
+Unbescape|org.unbescape:unbescape:1.1.6.RELEASE|org.unbescape|Text|Escape and unescape text
+Java String Similarity|info.debatty:java-string-similarity:2.0.0|info.debatty.java.stringsimilarity|Text|Levenshtein, Jaccard and more
+Java Diff Utils|io.github.java-diff-utils:java-diff-utils:4.12|com.github.difflib|Text|Compare texts
+RE2J|com.google.re2j:re2j:1.7|com.google.re2j|Text|Safe regular expressions
+Automaton|dk.brics:automaton:1.12-4|dk.brics.automaton|Text|Finite state automata
+ANTLR4 Runtime|org.antlr:antlr4-runtime:4.13.1|org.antlr.v4.runtime|Parsing|Parser runtime
+JavaParser|com.github.javaparser:javaparser-core:3.25.7|com.github.javaparser|Parsing|Parse and analyze Java code
+CommonMark|org.commonmark:commonmark:0.21.0|org.commonmark|Text|Markdown to HTML
+Txtmark|com.github.rjeschke:txtmark:0.13|com.github.rjeschke.txtmark|Text|Markdown processor
+FreeMarker|org.freemarker:freemarker:2.3.32|freemarker|Template|Template engine
+Mustache.java|com.github.spullara.mustache.java:compiler:0.9.10|com.github.mustachejava|Template|Mustache templates
+Slugify|com.github.slugify:slugify:3.0.6|com.github.slugify|Text|Make URL slugs
+Lorem|com.thedeanda:lorem:2.2|com.thedeanda.lorem|Text|Fake text generator
+JFiglet|com.github.lalyos:jfiglet:0.0.9|com.github.lalyos.jfiglet|Fun|ASCII art text
+Hashids|org.hashids:hashids:1.0.3|org.hashids|Utility|Short unique ids
+JNanoID|com.aventrix.jnanoid:jnanoid:2.0.0|com.aventrix.jnanoid|Utility|Tiny unique ids
+ULID Creator|com.github.f4b6a3:ulid-creator:5.2.3|com.github.f4b6a3.ulid|Utility|ULID generator
+Java UUID Generator|com.fasterxml.uuid:java-uuid-generator:5.0.0|com.fasterxml.uuid|Utility|UUID v1/v4/v5/v7
+Java SemVer|com.github.zafarkhaja:java-semver:0.9.0|com.github.zafarkhaja.semver|Utility|Semantic versioning
+Bouncy Castle|org.bouncycastle:bcprov-jdk18on:1.77|org.bouncycastle|Security|Crypto algorithms
+Jasypt|org.jasypt:jasypt:1.9.3|org.jasypt|Security|Simple encryption
+jBCrypt|org.mindrot:jbcrypt:0.4|org.mindrot.jbcrypt|Security|Password hashing
+JJWT API|io.jsonwebtoken:jjwt-api:0.12.3|io.jsonwebtoken|Security|JSON web tokens
+zxcvbn|com.nulab-inc:zxcvbn:1.8.2|com.nulabinc.zxcvbn|Security|Password strength
+ZXing Core|com.google.zxing:core:3.5.2|com.google.zxing|Media|QR and barcode encode/decode
+Metadata Extractor|com.drewnoakes:metadata-extractor:2.19.0 com.adobe.xmp:xmpcore:6.1.11|com.drew|Media|Read image metadata
+Commons Imaging|org.apache.commons:commons-imaging:1.0-alpha3|org.apache.commons.imaging|Media|Image formats
+Zip4j|net.lingala.zip4j:zip4j:2.11.5|net.lingala.zip4j|Files|Zip with passwords
+ZT-Zip|org.zeroturnaround:zt-zip:1.15 org.slf4j:slf4j-api:2.0.9|org.zeroturnaround.zip|Files|Easy zip utilities
+XZ for Java|org.tukaani:xz:1.9|org.tukaani.xz|Files|XZ compression
+LZ4 Java|org.lz4:lz4-java:1.8.0|net.jpountz.lz4|Files|Fast LZ4 compression
+Brotli Decoder|org.brotli:dec:0.1.2|org.brotli.dec|Files|Brotli decompress
+JExcelAPI|net.sourceforge.jexcelapi:jxl:2.6.12|jxl|Files|Read and write Excel files
+H2 Database|com.h2database:h2:2.2.224|org.h2|Database|Embedded SQL database
+MySQL Connector|com.mysql:mysql-connector-j:8.2.0|com.mysql|Database|MySQL JDBC driver
+MariaDB Connector|org.mariadb.jdbc:mariadb-java-client:3.3.1|org.mariadb.jdbc|Database|MariaDB JDBC driver
+PostgreSQL JDBC|org.postgresql:postgresql:42.7.1 org.checkerframework:checker-qual:3.41.0|org.postgresql|Database|PostgreSQL JDBC driver
+HikariCP|com.zaxxer:HikariCP:5.1.0 org.slf4j:slf4j-api:2.0.9|com.zaxxer.hikari|Database|JDBC connection pool
+Sql2o|org.sql2o:sql2o:1.6.0|org.sql2o|Database|Small SQL mapper
+Janino|org.codehaus.janino:janino:3.1.10 org.codehaus.janino:commons-compiler:3.1.10|org.codehaus.janino|Scripting|Compile Java at runtime
+BeanShell|org.apache-extras.beanshell:bsh:2.0b6|bsh|Scripting|Java scripting
+Rhino|org.mozilla:rhino:1.7.14|org.mozilla.javascript|Scripting|JavaScript engine
+LuaJ|org.luaj:luaj-jse:3.0.1|org.luaj.vm2|Scripting|Lua interpreter
+MVEL|org.mvel:mvel2:2.5.0.Final|org.mvel2|Scripting|Expression language
+Picocli|info.picocli:picocli:4.7.5|picocli|CLI|Build command line apps
+JCommander|com.beust:jcommander:1.82|com.beust.jcommander|CLI|Command line parameters
+args4j|args4j:args4j:2.33|org.kohsuke.args4j|CLI|Parse arguments
+JLine|org.jline:jline:3.25.0|org.jline|CLI|Interactive console input
+Kotlin Stdlib|org.jetbrains.kotlin:kotlin-stdlib:1.9.10 org.jetbrains:annotations:13.0|kotlin|Language|Kotlin standard library
+JetBrains Annotations|org.jetbrains:annotations:24.0.1|org.jetbrains.annotations|Annotations|@NotNull and @Nullable
+JSR305|com.google.code.findbugs:jsr305:3.0.2|javax.annotation|Annotations|Nullness annotations
+Checker Qual|org.checkerframework:checker-qual:3.41.0|org.checkerframework|Annotations|Type annotations
+Error Prone Annotations|com.google.errorprone:error_prone_annotations:2.23.0|com.google.errorprone.annotations|Annotations|Error Prone annotations
+AutoValue Annotations|com.google.auto.value:auto-value-annotations:1.10.4|com.google.auto.value|Annotations|AutoValue annotations
+javax.inject|javax.inject:javax.inject:1|javax.inject|DI|Dependency injection API
+Jakarta Inject|jakarta.inject:jakarta.inject-api:2.0.1|jakarta.inject|DI|Jakarta inject API
+Dagger|com.google.dagger:dagger:2.48.1 javax.inject:javax.inject:1|dagger|DI|Dependency injection
+AOP Alliance|aopalliance:aopalliance:1.0|org.aopalliance|DI|AOP interfaces
+Objenesis|org.objenesis:objenesis:3.3|org.objenesis|Reflection|Create objects without constructors
+Byte Buddy|net.bytebuddy:byte-buddy:1.14.10|net.bytebuddy|Reflection|Generate classes at runtime
+Javassist|org.javassist:javassist:3.29.2-GA|javassist|Reflection|Bytecode editing
+ASM|org.ow2.asm:asm:9.6|org.objectweb.asm|Reflection|Bytecode manipulation
+ClassGraph|io.github.classgraph:classgraph:4.8.165|io.github.classgraph|Reflection|Scan classpath
+MapStruct|org.mapstruct:mapstruct:1.5.5.Final|org.mapstruct|Mapping|Bean mapping annotations
+ModelMapper|org.modelmapper:modelmapper:3.2.0|org.modelmapper|Mapping|Object to object mapping
+JavaPoet|com.squareup:javapoet:1.13.0|com.squareup.javapoet|Codegen|Generate .java files
+Concurrent Trees|com.googlecode.concurrent-trees:concurrent-trees:2.6.1|com.googlecode.concurrenttrees|Utility|Prefix trees
+Minlog|com.esotericsoftware:minlog:1.3.1|com.esotericsoftware.minlog|Logging|Tiny logger

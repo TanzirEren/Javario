@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp">
+
+            <ImageView android:id="@+id/btnMenu" android:layout_width="38dp" android:layout_height="38dp" android:padding="9dp" android:src="@drawable/ic_menu" />
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:paddingLeft="6dp"
+                android:singleLine="true"
+                android:textSize="14sp" />
+
+            <ImageView android:id="@+id/btnRun" android:layout_width="38dp" android:layout_height="38dp" android:padding="9dp" android:src="@drawable/ic_run" />
+            <ImageView android:id="@+id/btnUndo" android:layout_width="38dp" android:layout_height="38dp" android:padding="10dp" android:src="@drawable/ic_undo" />
+            <ImageView android:id="@+id/btnRedo" android:layout_width="38dp" android:layout_height="38dp" android:padding="10dp" android:src="@drawable/ic_redo" />
+            <ImageView android:id="@+id/btnSave" android:layout_width="38dp" android:layout_height="38dp" android:padding="10dp" android:src="@drawable/ic_save" />
+            <ImageView android:id="@+id/btnMore" android:layout_width="38dp" android:layout_height="38dp" android:padding="9dp" android:src="@drawable/ic_more" />
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:id="@+id/tabScroll"
+            android:layout_width="match_parent"
+            android:layout_height="34dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/tabs"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:id="@+id/findBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="6dp"
+            android:visibility="gone">
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+                <EditText android:id="@+id/findInput" android:layout_width="0dp" android:layout_height="38dp" android:layout_weight="1" android:hint="Find" android:imeOptions="actionSearch" android:inputType="text" android:paddingLeft="10dp" android:singleLine="true" android:textSize="13sp" />
+                <TextView android:id="@+id/findPrev" android:layout_width="wrap_content" android:layout_height="38dp" android:gravity="center" android:paddingLeft="10dp" android:paddingRight="10dp" android:text="Prev" android:textSize="12sp" />
+                <TextView android:id="@+id/findNext" android:layout_width="wrap_content" android:layout_height="38dp" android:gravity="center" android:paddingLeft="10dp" android:paddingRight="10dp" android:text="Next" android:textSize="12sp" />
+                <TextView android:id="@+id/findClose" android:layout_width="wrap_content" android:layout_height="38dp" android:gravity="center" android:paddingLeft="10dp" android:paddingRight="6dp" android:text="Close" android:textSize="12sp" />
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:gravity="center_vertical" android:orientation="horizontal">
+                <EditText android:id="@+id/replaceInput" android:layout_width="0dp" android:layout_height="38dp" android:layout_weight="1" android:hint="Replace with" android:inputType="text" android:paddingLeft="10dp" android:singleLine="true" android:textSize="13sp" />
+                <TextView android:id="@+id/replaceOne" android:layout_width="wrap_content" android:layout_height="38dp" android:gravity="center" android:paddingLeft="10dp" android:paddingRight="10dp" android:text="Replace" android:textSize="12sp" />
+                <TextView android:id="@+id/replaceAll" android:layout_width="wrap_content" android:layout_height="38dp" android:gravity="center" android:paddingLeft="10dp" android:paddingRight="6dp" android:text="All" android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <com.tanzir.javario.CodeEditor
+                android:id="@+id/editor"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:id="@+id/emptyHint"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="Open a file from the explorer\n(tap the ≡ icon)"
+                android:textSize="14sp"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/errStrip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:paddingLeft="12dp"
+            android:paddingTop="5dp"
+            android:paddingRight="12dp"
+            android:paddingBottom="5dp"
+            android:textSize="12sp"
+            android:visibility="gone" />
+
+        <HorizontalScrollView
+            android:id="@+id/sugScroll"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:scrollbars="none"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/sugBar"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="4dp" />
+        </HorizontalScrollView>
+
+        <HorizontalScrollView
+            android:id="@+id/symScroll"
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/symBar"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/scrim"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#88000000"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/explorer"
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="invisible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="16dp"
+            android:paddingRight="6dp">
+
+            <TextView
+                android:id="@+id/exTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textSize="15sp" />
+
+            <ImageView android:id="@+id/exNew" android:layout_width="40dp" android:layout_height="40dp" android:padding="10dp" android:src="@drawable/ic_add" />
+            <ImageView android:id="@+id/exImport" android:layout_width="40dp" android:layout_height="40dp" android:padding="9dp" android:src="@drawable/ic_import" />
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/tree"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:divider="@null"
+            android:dividerHeight="0dp"
+            android:scrollbars="none" />
+    </LinearLayout>
+</FrameLayout>
