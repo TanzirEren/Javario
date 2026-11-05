@@ -16,10 +16,14 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - uses: android-actions/setup-android@v3
-
-      - name: Install Android platform
-        run: yes | sdkmanager "platforms;android-34" "build-tools;34.0.0" > /dev/null || true
+      # The runner already ships the Android SDK, so no setup-android action is needed.
+      - name: Make sure Android platform 34 exists
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          if [ ! -f "$ANDROID_HOME/platforms/android-34/android.jar" ]; then
+            yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+            "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-34" "build-tools;34.0.0"
+          fi
 
       - name: Bundle android.jar (used by the on-device compiler)
         run: |
