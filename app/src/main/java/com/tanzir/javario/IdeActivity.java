@@ -134,7 +134,7 @@ public class IdeActivity extends Activity {
         for (int id : ids) UI.icon((ImageView) findViewById(id), T.text);
         UI.tint((ImageView) findViewById(R.id.btnRun), T.accent);
         click(R.id.btnMenu, new Runnable() { @Override public void run() { if (explorerOpen) closeExplorer(); else openExplorer(); } });
-        click(R.id.btnRun, new Runnable() { @Override public void run() { run(); } });
+        click(R.id.btnRun, new Runnable() { @Override public void run() { runProject(); } });
         click(R.id.btnUndo, new Runnable() { @Override public void run() { editor.undo(); refreshUndo(); } });
         click(R.id.btnRedo, new Runnable() { @Override public void run() { editor.redo(); refreshUndo(); } });
         click(R.id.btnSave, new Runnable() { @Override public void run() { save(true); } });
@@ -510,7 +510,7 @@ public class IdeActivity extends Activity {
 
     // ------------------------------------------------------------ run
     void compileOnly() { runInternal(false); }
-    void run() { runInternal(true); }
+    void runProject() { runInternal(true); }
 
     void runInternal(final boolean launch) {
         save(false);
