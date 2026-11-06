@@ -121,6 +121,9 @@ public class JavaRunner {
             }
             args.add("-d"); args.add(classes.getAbsolutePath());
             for (File f : srcs) args.add(f.getAbsolutePath());
+            // Android reports java.version "0"; ECJ expects a real Java version string
+            System.setProperty("java.version", "1.8.0");
+            System.setProperty("java.specification.version", "1.8");
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             boolean ok = new Main(pw, pw, false, null, null).compile(args.toArray(new String[0]));
