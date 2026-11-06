@@ -65,7 +65,17 @@ public class JavaRunner {
         return best;
     }
 
-    public static Result run(Context ctx, File project, Log log) {
+    public static Result run(final Context ctx, File project, final Log log) {
+        CrashLog.step(ctx, "RUN: start");
+        Log lg = new Log() {
+            @Override public void step(String s) { CrashLog.step(ctx, "RUN: " + s); log.step(s); }
+        };
+        Result res = runInner(ctx, project, lg);
+        CrashLog.step(ctx, res.ok ? "RUN: compiled ok" : "DONE");
+        return res;
+    }
+
+    static Result runInner(Context ctx, File project, Log log) {
         Result r = new Result();
         try {
             log.step("Preparing toolchain…");

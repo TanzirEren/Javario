@@ -310,7 +310,10 @@ public class IdeActivity extends Activity {
         refreshTabs();
     }
 
+    boolean shownDirty;
+
     void refreshTabs() {
+        shownDirty = editor.dirty;
         tabs.removeAllViews();
         for (final File f : openFiles) {
             boolean cur = f.equals(current);
@@ -350,7 +353,7 @@ public class IdeActivity extends Activity {
 
     void edited() {
         refreshUndo();
-        if (current != null && tabs.getChildCount() > 0) refreshTabs();
+        if (editor.dirty != shownDirty) refreshTabs();
         h.removeCallbacks(autoSave);
         if (Prefs.b(this, "autosave")) h.postDelayed(autoSave, Math.max(1, Prefs.i(this, "autosave_delay")) * 1000L);
         triggerLive();
@@ -515,7 +518,7 @@ public class IdeActivity extends Activity {
         final TextView status = UI.text(this, "Starting…", 14, T.sub);
         final Dialog d = new Dlg(this).title(launch ? "Running" : "Checking code").view(status).show();
         d.setCancelable(false);
-        new Thread(new Runnable() {
+        new Thread(null, new Runnable() {
             @Override public void run() {
                 final JavaRunner.Result r = JavaRunner.run(IdeActivity.this, project, new JavaRunner.Log() {
                     @Override public void step(final String s) {
@@ -540,7 +543,7 @@ public class IdeActivity extends Activity {
                     }
                 });
             }
-        }).start();
+        }, "javario-compile", 128L * 1024 * 1024).start();
     }
 
     void showErrors(final String errors) {

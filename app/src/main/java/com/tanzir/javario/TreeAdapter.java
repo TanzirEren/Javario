@@ -99,7 +99,9 @@ public class TreeAdapter extends BaseAdapter {
         } else {
             arrow.setVisibility(View.INVISIBLE);
             icon.clearColorFilter();
-            icon.setImageDrawable(new ExtIcon(FileUtil.ext(r.f)));
+            icon.setBackground(null);
+            if (FileUtil.ext(r.f).equals("java")) icon.setImageResource(R.drawable.ic_file_java);
+            else icon.setImageDrawable(new ExtIcon(FileUtil.ext(r.f)));
         }
         return v;
     }

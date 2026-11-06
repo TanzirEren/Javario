@@ -85,8 +85,21 @@ public class ConsoleActivity extends Activity {
         autoScroll = Prefs.b(this, "console_autoscroll");
         fontSp = Prefs.i(this, "console_font");
         final String name = getIntent().getStringExtra("name");
-        build(name == null ? "Console" : name);
-        startRun();
+        CrashLog.step(this, "CONSOLE: opening");
+        try {
+            build(name == null ? "Console" : name);
+            startRun();
+        } catch (Throwable t) {
+            java.io.StringWriter sw = new java.io.StringWriter();
+            t.printStackTrace(new java.io.PrintWriter(sw));
+            TextView tv = new TextView(this);
+            tv.setTextColor(0xFFFF6B6B);
+            tv.setTextIsSelectable(true);
+            tv.setPadding(30, 60, 30, 30);
+            tv.setText("Console failed to start:\n\n" + sw);
+            setContentView(new ScrollView(this) {{ addView(tv); }});
+            CrashLog.step(this, "DONE");
+        }
     }
 
     void build(String name) {
@@ -187,13 +200,18 @@ public class ConsoleActivity extends Activity {
         System.setOut(new PrintStream(new Sink(false), true));
         System.setErr(new PrintStream(new Sink(true), true));
         System.setIn(stdin);
+        final Thread.UncaughtExceptionHandler prev = Thread.getDefaultUncaughtExceptionHandler();
         Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override public void uncaughtException(Thread t, Throwable e) { e.printStackTrace(); }
+            @Override public void uncaughtException(Thread t, Throwable e) {
+                if (t == Looper.getMainLooper().getThread() && prev != null) prev.uncaughtException(t, e);
+                else e.printStackTrace();
+            }
         });
         t0 = System.currentTimeMillis();
         new Thread(new Runnable() {
             @Override public void run() {
                 try {
+                    CrashLog.step(ConsoleActivity.this, "CONSOLE: loading dex");
                     DexClassLoader cl = new DexClassLoader(dex, getCodeCacheDir().getAbsolutePath(), null, ConsoleActivity.class.getClassLoader());
                     Class<?> c = cl.loadClass(main);
                     Method m = c.getMethod("main", String[].class);
@@ -208,6 +226,7 @@ public class ConsoleActivity extends Activity {
                 runOnUiThread(new Runnable() {
                     @Override public void run() {
                         finished = true;
+                        CrashLog.step(ConsoleActivity.this, "DONE");
                         status.setText("Finished");
                         if (Prefs.b(ConsoleActivity.this, "show_timing")) post("\n[Process finished in " + ms + " ms]\n", false);
                     }

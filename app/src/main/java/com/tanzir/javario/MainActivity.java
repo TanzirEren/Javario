@@ -120,6 +120,29 @@ public class MainActivity extends Activity {
             ProjectStore.root().mkdirs();
         }
         refresh();
+        showCrashIfAny();
+    }
+
+    boolean crashShown;
+
+    void showCrashIfAny() {
+        final String c = CrashLog.pending(this);
+        if (c == null || crashShown) return;
+        crashShown = true;
+        TextView t = UI.text(this, c, 11, 0xFFFF7A7A);
+        t.setTypeface(android.graphics.Typeface.MONOSPACE);
+        t.setTextIsSelectable(true);
+        new Dlg(this).title("Javario stopped last time").msg("Copy this report and send it to the developer.")
+            .scroll(t, 300)
+            .neg("Copy", new Runnable() {
+                @Override public void run() {
+                    android.content.ClipboardManager cm = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                    cm.setPrimaryClip(android.content.ClipData.newPlainText("crash", c));
+                    UI.toast(MainActivity.this, "Copied");
+                    CrashLog.clear(MainActivity.this);
+                }
+            })
+            .pos("Close", new Runnable() { @Override public void run() { CrashLog.clear(MainActivity.this); } }).show();
     }
 
     void askPermission() {
