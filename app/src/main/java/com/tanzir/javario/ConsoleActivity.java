@@ -167,7 +167,7 @@ public class ConsoleActivity extends Activity {
 
     void restart() {
         killRunner();
-        sb.setLength(0);
+        sb.clear();
         out.setText(sb);
         h.postDelayed(new Runnable() { @Override public void run() { start(); } }, 400);
     }
