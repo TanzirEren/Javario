@@ -1,18 +1,11 @@
 package com.tanzir.javario;
 
 import android.content.Context;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 /** Java learning assistant: offline knowledge base + optional Claude API. */
 public class AssistantEngine {
@@ -106,7 +99,7 @@ public class AssistantEngine {
             if (score > bestScore) { bestScore = score; best = k[1]; }
         }
         if (best != null) return best;
-        return "I can help with Java topics (loops, arrays, classes, collections, exceptions, streams, ...), explain compiler errors, explain your code, give challenges, quizzes and tips.\n\nTry: \"how do loops work\", \"explain my code\", \"explain error\", \"quiz me\".\n\nFor open questions, turn on the Claude API engine in Settings > Assistant.";
+        return "I can help with Java topics (loops, arrays, classes, collections, exceptions, streams, ...), explain compiler errors, explain your code, give challenges, quizzes and tips.\n\nTry: \"how do loops work\", \"explain my code\", \"explain error\", \"quiz me\".\n\nFor open questions, add an AI provider in Settings > Assistant and pick a model in the chat box.";
     }
 
     static String matchError(String lq) {
@@ -155,45 +148,5 @@ public class AssistantEngine {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < l.size(); i++) { if (i > 0) sb.append(", "); sb.append(l.get(i)); }
         return sb.toString();
-    }
-
-    /** Online engine (Claude API). Must run on a background thread. */
-    public static String claude(Context c, JSONArray history, String code, String errors) throws Exception {
-        String key = Prefs.s(c, "ai_key").trim();
-        if (key.isEmpty()) throw new Exception("Add your Claude API key in Settings > Assistant.");
-        String system = "You are Javario Assistant, a friendly Java tutor inside an Android code editor. Explain simply, give short code examples, "
-            + "and help fix compile errors. Only Java and XML are used in this app. Keep answers concise for a phone screen.";
-        if (code != null && !code.isEmpty()) system += "\n\nThe user's current file:\n" + code;
-        if (errors != null && !errors.isEmpty()) system += "\n\nLatest build errors:\n" + errors;
-        JSONObject body = new JSONObject();
-        body.put("model", Prefs.s(c, "ai_model").trim().isEmpty() ? "claude-sonnet-4-6" : Prefs.s(c, "ai_model").trim());
-        body.put("max_tokens", 1024);
-        body.put("system", system);
-        body.put("messages", history);
-        HttpURLConnection h = (HttpURLConnection) new URL("https://api.anthropic.com/v1/messages").openConnection();
-        h.setRequestMethod("POST");
-        h.setConnectTimeout(15000);
-        h.setReadTimeout(60000);
-        h.setDoOutput(true);
-        h.setRequestProperty("content-type", "application/json");
-        h.setRequestProperty("x-api-key", key);
-        h.setRequestProperty("anthropic-version", "2023-06-01");
-        OutputStream o = h.getOutputStream();
-        o.write(body.toString().getBytes("UTF-8"));
-        o.close();
-        int code2 = h.getResponseCode();
-        BufferedReader r = new BufferedReader(new InputStreamReader(code2 < 400 ? h.getInputStream() : h.getErrorStream(), "UTF-8"));
-        StringBuilder sb = new StringBuilder();
-        String ln;
-        while ((ln = r.readLine()) != null) sb.append(ln);
-        r.close();
-        if (code2 >= 400) throw new Exception("API error " + code2 + ": " + sb);
-        JSONArray content = new JSONObject(sb.toString()).getJSONArray("content");
-        StringBuilder out = new StringBuilder();
-        for (int i = 0; i < content.length(); i++) {
-            JSONObject b = content.getJSONObject(i);
-            if ("text".equals(b.optString("type"))) out.append(b.getString("text"));
-        }
-        return out.toString();
     }
 }

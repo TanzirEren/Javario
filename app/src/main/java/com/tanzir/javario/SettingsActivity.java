@@ -53,7 +53,10 @@ public class SettingsActivity extends Activity {
         tool("Java Assistant", "Ask questions, explain errors, get hints", AssistantActivity.class);
         for (final String[] d : Prefs.DEFS) {
             switch (d[1]) {
-                case "header": header(d[3]); break;
+                case "header":
+                    header(d[3]);
+                    if (d[3].equals("Assistant")) tool("Add / manage AI providers", providerSummary(), ProvidersActivity.class);
+                    break;
                 case "switch": switchRow(d); break;
                 case "choice": choiceRow(d); break;
                 case "seek": seekRow(d); break;
@@ -62,6 +65,13 @@ public class SettingsActivity extends Activity {
         }
         header("About");
         card("Javario 1.0.0", "Learn, write and run Java on your phone.\nCompiler: ECJ + D8. Language: Java & XML.");
+    }
+
+    String providerSummary() {
+        java.util.ArrayList<AiProvider> ps = AiProvider.load(this);
+        int on = 0, models = 0;
+        for (AiProvider p : ps) { if (p.enabled) on++; models += p.enabledCount(); }
+        return ps.isEmpty() ? "OpenRouter, OpenAI, Gemini, Groq, Claude, custom… (20 presets)" : ps.size() + " providers · " + on + " on · " + models + " models selected";
     }
 
     void header(String s) {

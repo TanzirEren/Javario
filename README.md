@@ -19,5 +19,9 @@ The workflow copies `android.jar` from the SDK into the app assets. The on-devic
 ## Main features
 Projects (create/rename/duplicate/zip/delete) · glass file explorer with tree + extension icons · create/import/rename/move/export/delete files & folders · tabs · syntax highlight (Java/XML) · live red error underline · line numbers · pinch zoom · undo/redo · auto indent · auto close brackets · suggestions + snippets (sout, fori, psvm…) · symbol bar · find & replace · go to line · format code · compile check · run dialog + console with Scanner input · copy-all error dialog · 170+ libraries with auto download · Maven coordinate download · Learn (12 lessons) · Challenges (10) · Assistant (offline tutor, error explainer, quiz; optional Claude API) · 5 app themes · 10 editor themes · 34 settings.
 
+## AI providers (Settings → Assistant → Add / manage AI providers)
+20 presets (OpenRouter, OpenAI, Gemini, Groq, Claude, DeepSeek, Mistral, xAI, Together, Fireworks, Cerebras, NVIDIA, SambaNova, Hugging Face, Perplexity, Moonshot, Cohere, OmniRoute, Ollama, LM Studio) or a custom provider (name, base URL, API key, model id). Fetch models, FREE tags, All / Free / None selection, search, per-provider and per-model switches, test connection, duplicate/delete.
+The IDE has an AI panel (sparkle icon left of Run) that can read the open file, selection, errors and project files, and apply code to files.
+
 ## Not tested warning
 This project was generated without compiling it. If GitHub Actions shows a compile error, send me the log and I will fix it.

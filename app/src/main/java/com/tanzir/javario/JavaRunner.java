@@ -22,6 +22,7 @@ public class JavaRunner {
         public String errors = "";
         public String dex;
         public String main;
+        public String jars = "";
     }
 
     public interface Log { void step(String s); }
@@ -47,7 +48,7 @@ public class JavaRunner {
         }
     }
 
-    static String findMain(Context ctx, ArrayList<File> srcs) {
+    static String findMain(Context ctx, ArrayList<File> srcs, File prefer) {
         String pref = Prefs.s(ctx, "main_class").trim();
         Pattern mainP = Pattern.compile("static\\s+void\\s+main\\s*\\(");
         Pattern pkgP = Pattern.compile("(?m)^\\s*package\\s+([\\w.]+)\\s*;");
@@ -58,6 +59,7 @@ public class JavaRunner {
                 if (!mainP.matcher(t).find()) continue;
                 Matcher pm = pkgP.matcher(t);
                 String cls = (pm.find() ? pm.group(1) + "." : "") + FileUtil.baseName(f.getName());
+                if (prefer != null && f.equals(prefer)) return cls;
                 if (!pref.isEmpty() && (cls.equals(pref) || f.getName().equals(pref + ".java"))) return cls;
                 if (best == null || f.getName().equals("Main.java")) best = cls;
             } catch (IOException ignored) { }
@@ -65,17 +67,17 @@ public class JavaRunner {
         return best;
     }
 
-    public static Result run(final Context ctx, File project, final Log log) {
+    public static Result run(final Context ctx, File project, File prefer, final Log log) {
         CrashLog.step(ctx, "RUN: start");
         Log lg = new Log() {
             @Override public void step(String s) { CrashLog.step(ctx, "RUN: " + s); log.step(s); }
         };
-        Result res = runInner(ctx, project, lg);
-        CrashLog.step(ctx, res.ok ? "RUN: compiled ok" : "DONE");
+        Result res = runInner(ctx, project, prefer, lg);
+        CrashLog.step(ctx, "DONE");
         return res;
     }
 
-    static Result runInner(Context ctx, File project, Log log) {
+    static Result runInner(Context ctx, File project, File prefer, Log log) {
         Result r = new Result();
         try {
             log.step("Preparing toolchain…");
@@ -85,7 +87,7 @@ public class JavaRunner {
             if (srcs.isEmpty()) { r.errors = "No .java files found in this project."; return r; }
             StringBuilder all = new StringBuilder();
             for (File f : srcs) all.append(FileUtil.read(f)).append('\n');
-            r.main = findMain(ctx, srcs);
+            r.main = findMain(ctx, srcs, prefer);
             if (r.main == null) {
                 r.errors = "No main method found.\n\nAdd this to one of your classes:\n\npublic static void main(String[] args) {\n    // your code\n}";
                 return r;
@@ -131,6 +133,9 @@ public class JavaRunner {
             if (!ok) {
                 r.errors = sw.toString().trim();
                 if (r.errors.isEmpty()) r.errors = "Compilation failed.";
+                String low = r.errors;
+                if (low.contains("java.awt") || low.contains("javax.swing") || low.contains("javafx") || low.contains("java.applet"))
+                    r.errors += "\n\nHint: Android has no AWT, Swing or JavaFX. Use console programs (System.out / Scanner) in Javario.";
                 return r;
             }
 
@@ -162,6 +167,23 @@ public class JavaRunner {
             }
             if (dp.length() == 0) { r.errors = "No dex output was produced."; return r; }
             r.dex = dp.toString();
+            // jars are also given to the runner (read-only copies) so libraries can load their resource files
+            File cache = new File(ctx.getFilesDir(), "libcache");
+            cache.mkdirs();
+            StringBuilder jp = new StringBuilder();
+            for (File j : jars) {
+                try {
+                    File c = new File(cache, project.getName() + "_" + j.getName());
+                    if (!c.exists() || c.length() != j.length()) {
+                        if (c.exists()) { c.setWritable(true); c.delete(); }
+                        FileUtil.copyFile(j, c);
+                    }
+                    c.setReadOnly();
+                    if (jp.length() > 0) jp.append(File.pathSeparator);
+                    jp.append(c.getAbsolutePath());
+                } catch (IOException ignored) { }
+            }
+            r.jars = jp.toString();
             r.ok = true;
             return r;
         } catch (Throwable t) {

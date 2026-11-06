@@ -20,6 +20,7 @@ import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -43,7 +44,10 @@ public class IdeActivity extends Activity {
     File project;
     CodeEditor editor;
     TextView title, emptyHint, errStrip;
-    LinearLayout tabs, sugBar, symBar, findBar, explorer;
+    LinearLayout tabs, sugBar, symBar, findBar, explorer, aiPanel;
+    FrameLayout aiHost;
+    ChatView chat;
+    boolean aiOpen;
     HorizontalScrollView tabScroll, sugScroll;
     View scrim;
     ListView treeList;
@@ -119,6 +123,8 @@ public class IdeActivity extends Activity {
         treeList = (ListView) findViewById(R.id.tree);
         findInput = (EditText) findViewById(R.id.findInput);
         replaceInput = (EditText) findViewById(R.id.replaceInput);
+        aiPanel = (LinearLayout) findViewById(R.id.aiPanel);
+        aiHost = (FrameLayout) findViewById(R.id.aiHost);
         btnUndo = (ImageView) findViewById(R.id.btnUndo);
         btnRedo = (ImageView) findViewById(R.id.btnRedo);
     }
@@ -130,9 +136,20 @@ public class IdeActivity extends Activity {
         title.setTextColor(T.text);
         title.setTypeface(UI.medium());
         title.setText(project.getName());
-        int[] ids = {R.id.btnMenu, R.id.btnRun, R.id.btnUndo, R.id.btnRedo, R.id.btnSave, R.id.btnMore, R.id.exNew, R.id.exImport};
+        int[] ids = {R.id.btnMenu, R.id.btnAi, R.id.btnRun, R.id.aiNew, R.id.aiClose, R.id.btnUndo, R.id.btnRedo, R.id.btnSave, R.id.btnMore, R.id.exNew, R.id.exImport};
         for (int id : ids) UI.icon((ImageView) findViewById(id), T.text);
         UI.tint((ImageView) findViewById(R.id.btnRun), T.accent);
+        UI.tint((ImageView) findViewById(R.id.btnAi), T.accent);
+        UI.tint((ImageView) findViewById(R.id.aiLogo), T.accent);
+        ((TextView) findViewById(R.id.aiTitle)).setTextColor(T.text);
+        ((TextView) findViewById(R.id.aiTitle)).setTypeface(UI.medium());
+        click(R.id.btnAi, new Runnable() { @Override public void run() { if (aiOpen) closeAi(); else openAi(); } });
+        click(R.id.aiClose, new Runnable() { @Override public void run() { closeAi(); } });
+        click(R.id.aiNew, new Runnable() { @Override public void run() { ensureChat().newChat(); } });
+        aiPanel.setBackground(UI.round(this, UI.alpha(T.surface, 0xF2), T.stroke, 0));
+        int pw = Math.min(UI.dp(this, 380), (int) (getResources().getDisplayMetrics().widthPixels * 0.94f));
+        aiPanel.getLayoutParams().width = pw;
+        aiPanel.post(new Runnable() { @Override public void run() { aiPanel.setTranslationX(aiPanel.getWidth()); aiPanel.setVisibility(View.VISIBLE); } });
         click(R.id.btnMenu, new Runnable() { @Override public void run() { if (explorerOpen) closeExplorer(); else openExplorer(); } });
         click(R.id.btnRun, new Runnable() { @Override public void run() { runProject(); } });
         click(R.id.btnUndo, new Runnable() { @Override public void run() { editor.undo(); refreshUndo(); } });
@@ -178,7 +195,7 @@ public class IdeActivity extends Activity {
         emptyHint.setTextColor(T.sub);
         errStrip.setBackgroundColor(UI.alpha(0xFFFF4D4F, 40));
         errStrip.setTextColor(0xFFFF6B6B);
-        scrim.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v) { closeExplorer(); } });
+        scrim.setOnClickListener(new View.OnClickListener() { @Override public void onClick(View v) { closeExplorer(); closeAi(); } });
         applyEditorPrefs();
     }
 
@@ -214,6 +231,7 @@ public class IdeActivity extends Activity {
 
     // ------------------------------------------------------------ explorer
     void openExplorer() {
+        if (aiOpen) closeAi();
         explorerOpen = true;
         tree.selected = current;
         tree.reload();
@@ -225,6 +243,106 @@ public class IdeActivity extends Activity {
         explorer.animate().translationX(0).setDuration(d).start();
     }
 
+    // ------------------------------------------------------------ AI panel
+    ChatView ensureChat() {
+        if (chat == null) {
+            chat = new ChatView(this, bridge, "ide_" + project.getName());
+            aiHost.addView(chat, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        }
+        return chat;
+    }
+
+    void openAi() {
+        if (explorerOpen) closeExplorer();
+        ensureChat().onResume();
+        chat.refreshAttBar();
+        aiOpen = true;
+        hideKeyboard();
+        scrim.setVisibility(View.VISIBLE);
+        scrim.setAlpha(0);
+        long d = Prefs.b(this, "animations") ? 230 : 0;
+        scrim.animate().alpha(1).setDuration(d).start();
+        aiPanel.animate().translationX(0).setDuration(d).start();
+    }
+
+    void closeAi() {
+        if (!aiOpen) return;
+        aiOpen = false;
+        long d = Prefs.b(this, "animations") ? 200 : 0;
+        if (!explorerOpen) scrim.animate().alpha(0).setDuration(d).withEndAction(new Runnable() { @Override public void run() { if (!aiOpen && !explorerOpen) scrim.setVisibility(View.GONE); } }).start();
+        aiPanel.animate().translationX(aiPanel.getWidth()).setDuration(d).start();
+        View f = getCurrentFocus();
+        if (f != null) {
+            android.view.inputmethod.InputMethodManager m = (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            m.hideSoftInputFromWindow(f.getWindowToken(), 0);
+        }
+    }
+
+    final ChatView.Bridge bridge = new ChatView.Bridge() {
+        @Override public File project() { return project; }
+        @Override public String currentName() {
+            if (current == null) return "";
+            String p = current.getAbsolutePath(), b = project.getAbsolutePath();
+            return p.startsWith(b) ? p.substring(b.length() + 1) : current.getName();
+        }
+        @Override public String currentText() { return current == null ? "" : editor.getText().toString(); }
+        @Override public String selectedText() {
+            if (current == null) return "";
+            int a = Math.min(editor.getSelectionStart(), editor.getSelectionEnd()), b = Math.max(editor.getSelectionStart(), editor.getSelectionEnd());
+            return a < 0 || b <= a ? "" : editor.getText().subSequence(a, b).toString();
+        }
+        @Override public String projectTree() {
+            StringBuilder sb = new StringBuilder();
+            int n = 0;
+            for (File f : files()) {
+                if (n++ > 80) { sb.append("…\n"); break; }
+                sb.append(f.getAbsolutePath().substring(project.getAbsolutePath().length() + 1)).append('\n');
+            }
+            return sb.toString();
+        }
+        @Override public String lastErrors() {
+            StringBuilder sb = new StringBuilder();
+            if (lastErrors != null && !lastErrors.isEmpty()) sb.append(lastErrors);
+            if (current != null) for (CodeEditor.Err e : editor.getErrors()) sb.append("\n").append(currentName()).append(" line ").append(e.line + 1).append(": ").append(e.msg);
+            return sb.toString().trim();
+        }
+        @Override public List<File> files() {
+            ArrayList<File> all = new ArrayList<>(), out = new ArrayList<>();
+            FileUtil.walk(project, all);
+            for (File f : all) {
+                String p = f.getAbsolutePath().substring(project.getAbsolutePath().length() + 1);
+                if (p.startsWith("build/") || p.startsWith(".") || p.contains("/.") || p.endsWith(".jar") || p.endsWith(".class")) continue;
+                out.add(f);
+            }
+            return out;
+        }
+        @Override public void insert(String code) { if (current != null) editor.insertText(code); else UI.toast(IdeActivity.this, "Open a file first"); }
+        @Override public void replaceSelection(String code) { if (current != null) editor.insertText(code); }
+        @Override public void replaceCurrent(String code) { if (current != null) editor.replaceAllText(code); else UI.toast(IdeActivity.this, "Open a file first"); }
+        @Override public void applyToFile(String rel, String content) {
+            rel = rel.replace("\\", "/");
+            while (rel.startsWith("/")) rel = rel.substring(1);
+            File f = new File(project, rel);
+            if (!f.exists() && !rel.contains("/") && new File(project, "src").isDirectory()) f = new File(project, "src/" + rel);
+            try {
+                if (!f.getCanonicalPath().startsWith(project.getCanonicalPath())) { UI.toast(IdeActivity.this, "Path is outside the project"); return; }
+                if (!f.exists()) FileUtil.write(f, "");
+            } catch (IOException e) { UI.toast(IdeActivity.this, "Cannot write file"); return; }
+            tree.reload();
+            if (f.equals(current)) editor.replaceAllText(content);
+            else { openFile(f); if (f.equals(current)) editor.replaceAllText(content); }
+            UI.toast(IdeActivity.this, "Updated " + f.getName() + " (undo available)");
+        }
+        @Override public void newFile(String name, String content) {
+            File dir = new File(project, "src");
+            if (!dir.isDirectory()) dir = project;
+            File f = new File(dir, FileUtil.uniqueName(dir, name));
+            try { FileUtil.write(f, content); } catch (IOException e) { UI.toast(IdeActivity.this, "Cannot create file"); return; }
+            tree.reload();
+            openFile(f);
+        }
+    };
+
     void closeExplorer() {
         explorerOpen = false;
         long d = Prefs.b(this, "animations") ? 200 : 0;
@@ -233,6 +351,7 @@ public class IdeActivity extends Activity {
     }
 
     @Override public void onBackPressed() {
+        if (aiOpen) { closeAi(); return; }
         if (explorerOpen) { closeExplorer(); return; }
         if (findBar.getVisibility() == View.VISIBLE) { findBar.setVisibility(View.GONE); return; }
         save(false);
@@ -271,6 +390,7 @@ public class IdeActivity extends Activity {
             refreshUndo();
             cursorMoved();
             triggerLive();
+            if (chat != null) chat.refreshAttBar();
         } catch (IOException e) {
             UI.toast(this, "Cannot open: " + e.getMessage());
         }
@@ -509,18 +629,25 @@ public class IdeActivity extends Activity {
     }
 
     // ------------------------------------------------------------ run
+    /** The open file is run if it has a main method, otherwise Main.java / the first class with main. */
+    File mainPreference() {
+        if (current != null && current.getName().endsWith(".java") && editor.getText().toString().matches("(?s).*static\\s+void\\s+main\\s*\\(.*")) return current;
+        return null;
+    }
+
     void compileOnly() { runInternal(false); }
     void runProject() { runInternal(true); }
 
     void runInternal(final boolean launch) {
         save(false);
         if (Prefs.b(this, "haptics")) editor.performHapticFeedback(android.view.HapticFeedbackConstants.KEYBOARD_TAP);
+        final File prefer = mainPreference();
         final TextView status = UI.text(this, "Starting…", 14, T.sub);
         final Dialog d = new Dlg(this).title(launch ? "Running" : "Checking code").view(status).show();
         d.setCancelable(false);
         new Thread(null, new Runnable() {
             @Override public void run() {
-                final JavaRunner.Result r = JavaRunner.run(IdeActivity.this, project, new JavaRunner.Log() {
+                final JavaRunner.Result r = JavaRunner.run(IdeActivity.this, project, prefer, new JavaRunner.Log() {
                     @Override public void step(final String s) {
                         runOnUiThread(new Runnable() { @Override public void run() { status.setText(s); } });
                     }
@@ -536,6 +663,8 @@ public class IdeActivity extends Activity {
                                 Intent i = new Intent(IdeActivity.this, ConsoleActivity.class);
                                 i.putExtra("dex", r.dex);
                                 i.putExtra("main", r.main);
+                                i.putExtra("jars", r.jars);
+                                i.putExtra("projectDir", project.getAbsolutePath());
                                 i.putExtra("name", project.getName());
                                 startActivity(i);
                             } else UI.toast(IdeActivity.this, "No errors found");
@@ -572,13 +701,8 @@ public class IdeActivity extends Activity {
         t.setTextIsSelectable(true);
         t.setHorizontallyScrolling(true);
         new Dlg(this).title("Build failed").scroll(t, 320)
-            .neg("Ask assistant", new Runnable() {
-                @Override public void run() {
-                    Intent in = new Intent(IdeActivity.this, AssistantActivity.class);
-                    in.putExtra("errors", errors);
-                    in.putExtra("code", editor.getText().length() > 8000 ? editor.getText().toString().substring(0, 8000) : editor.getText().toString());
-                    startActivity(in);
-                }
+            .neg("Fix with AI", new Runnable() {
+                @Override public void run() { askAiToFix(errors); }
             })
             .neg("Copy all", new Runnable() {
                 @Override public void run() {
@@ -588,6 +712,12 @@ public class IdeActivity extends Activity {
                 }
             })
             .pos("Close", null).show();
+        if (Prefs.b(this, "ai_auto_bug") && !AiProvider.selected(this).p.isBuiltin()) askAiToFix(errors);
+    }
+
+    void askAiToFix(String errors) {
+        openAi();
+        ensureChat().autoSend("My build failed. Find the bugs that cause these errors, explain each in one sentence and give the corrected code.", "build errors", errors);
     }
 
     // ------------------------------------------------------------ file operations
@@ -765,6 +895,7 @@ public class IdeActivity extends Activity {
 
     @Override protected void onActivityResult(final int req, int res, final Intent data) {
         super.onActivityResult(req, res, data);
+        if (req == ChatView.REQ_FILE || req == ChatView.REQ_IMAGE) { if (chat != null) chat.handleResult(req, res, data); return; }
         if (res != RESULT_OK || data == null || importTarget == null) return;
         final File target = importTarget;
         new Thread(new Runnable() {

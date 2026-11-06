@@ -31,6 +31,7 @@
                 android:singleLine="true"
                 android:textSize="14sp" />
 
+            <ImageView android:id="@+id/btnAi" android:layout_width="38dp" android:layout_height="38dp" android:padding="9dp" android:src="@drawable/ic_ai" />
             <ImageView android:id="@+id/btnRun" android:layout_width="38dp" android:layout_height="38dp" android:padding="9dp" android:src="@drawable/ic_run" />
             <ImageView android:id="@+id/btnUndo" android:layout_width="38dp" android:layout_height="38dp" android:padding="10dp" android:src="@drawable/ic_undo" />
             <ImageView android:id="@+id/btnRedo" android:layout_width="38dp" android:layout_height="38dp" android:padding="10dp" android:src="@drawable/ic_redo" />
@@ -180,5 +181,44 @@
             android:divider="@null"
             android:dividerHeight="0dp"
             android:scrollbars="none" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/aiPanel"
+        android:layout_width="360dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:orientation="vertical"
+        android:visibility="invisible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingLeft="16dp"
+            android:paddingRight="6dp">
+
+            <ImageView android:id="@+id/aiLogo" android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/ic_ai" />
+
+            <TextView
+                android:id="@+id/aiTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:paddingLeft="8dp"
+                android:singleLine="true"
+                android:text="AI Assistant"
+                android:textSize="15sp" />
+
+            <ImageView android:id="@+id/aiNew" android:layout_width="40dp" android:layout_height="40dp" android:padding="10dp" android:src="@drawable/ic_chat_new" />
+            <ImageView android:id="@+id/aiClose" android:layout_width="40dp" android:layout_height="40dp" android:padding="11dp" android:src="@drawable/ic_close" />
+        </LinearLayout>
+
+        <FrameLayout
+            android:id="@+id/aiHost"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
     </LinearLayout>
 </FrameLayout>

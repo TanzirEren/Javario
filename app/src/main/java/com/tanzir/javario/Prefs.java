@@ -46,9 +46,17 @@ public class Prefs {
         {"show_timing", "switch", "1", "Show run time", "Print how long the program ran", ""},
 
         {"#", "header", "", "Assistant", "", ""},
-        {"ai_mode", "choice", "0", "Assistant engine", "Offline works without internet", "Offline,Claude API (online)"},
-        {"ai_key", "text", "", "Claude API key", "Only needed for the online engine", ""},
-        {"ai_model", "text", "claude-sonnet-4-6", "Claude model", "Model name used by the online engine", ""},
+        {"ai_stream", "switch", "1", "Stream replies", "Show the answer while it is being written", ""},
+        {"ai_temperature", "seek", "7", "Creativity", "x0.1 - lower is more exact, higher is more creative", "0:20"},
+        {"ai_max_tokens", "seek", "1500", "Max reply length (tokens)", "", "256:4096"},
+        {"ai_history", "seek", "12", "Chat memory (messages)", "How many earlier messages the model can see", "2:40"},
+        {"ai_font", "seek", "13", "Chat text size", "Small text like ChatGPT / Claude", "10:18"},
+        {"ai_include_code", "switch", "1", "Send current file in IDE chat", "The open file is attached to your messages (can be turned off in the chat)", ""},
+        {"ai_include_tree", "switch", "1", "Send project structure", "Lets the AI know your file names", ""},
+        {"ai_auto_bug", "switch", "1", "Auto bug detection", "After a failed run, the AI panel opens and analyses the errors", ""},
+        {"ai_confirm_apply", "switch", "1", "Confirm before AI changes code", "You can always undo", ""},
+        {"ai_save_chats", "switch", "1", "Save chat history", "", ""},
+        {"ai_system", "text", "", "Custom instructions", "Extra rules added to every AI request", ""},
     };
 
     private static HashMap<String, String[]> map;

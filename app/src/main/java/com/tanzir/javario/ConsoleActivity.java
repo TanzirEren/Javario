@@ -3,16 +3,20 @@ package com.tanzir.javario;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
-import android.os.Process;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
-import android.text.method.ScrollingMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -24,59 +28,54 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import dalvik.system.DexClassLoader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.concurrent.LinkedBlockingQueue;
 
-/** Console page. Runs in its own process (:console) so Stop / System.exit never closes the IDE. */
+/** Console page. The program itself runs in RunnerService (separate process). */
 public class ConsoleActivity extends Activity {
-    static class LineInput extends InputStream {
-        final LinkedBlockingQueue<Integer> q = new LinkedBlockingQueue<>();
-        void feed(String s) { for (byte b : (s + "\n").getBytes(StandardCharsets.UTF_8)) q.add(b & 0xff); }
-        @Override public int read() throws IOException {
-            try { return q.take(); } catch (InterruptedException e) { return -1; }
-        }
-        @Override public int read(byte[] b, int o, int l) throws IOException {
-            if (l == 0) return 0;
-            int f = read();
-            if (f < 0) return -1;
-            b[o] = (byte) f;
-            int n = 1;
-            Integer x;
-            while (n < l && (x = q.poll()) != null) b[o + n++] = (byte) (int) x;
-            return n;
-        }
-        @Override public int available() { return q.size(); }
-    }
-
-    class Sink extends OutputStream {
-        final boolean err;
-        Sink(boolean e) { err = e; }
-        @Override public void write(int b) { write(new byte[]{(byte) b}, 0, 1); }
-        @Override public void write(byte[] b, int off, int len) { post(new String(b, off, len, StandardCharsets.UTF_8), err); }
-    }
-
-    static class Seg { String s; boolean err; Seg(String s, boolean e) { this.s = s; err = e; } }
-
     AppThemes T;
-    TextView out;
+    TextView out, status;
     ScrollView sv;
     EditText in;
-    final LineInput stdin = new LineInput();
     final SpannableStringBuilder sb = new SpannableStringBuilder();
-    final ArrayList<Seg> queue = new ArrayList<>();
     final Handler h = new Handler(Looper.getMainLooper());
-    boolean scheduled, autoScroll, finished;
+    boolean autoScroll, finished, stopping, bound;
     float fontSp;
-    TextView status;
+    Messenger service;
+    String dex, main, jars, project;
     long t0;
+
+    final Handler replyHandler = new Handler(Looper.getMainLooper()) {
+        @Override public void handleMessage(Message m) {
+            String t = m.getData().getString("t", "");
+            if (m.what == RunnerService.MSG_OUT) add(t, false);
+            else if (m.what == RunnerService.MSG_ERR) add(t, true);
+            else if (m.what == RunnerService.MSG_DONE) {
+                finished = true;
+                status.setText("Finished");
+                if (Prefs.b(ConsoleActivity.this, "show_timing")) add("\n[Process finished in " + m.getData().getLong("n") + " ms]\n", false);
+            }
+        }
+    };
+    final Messenger reply = new Messenger(replyHandler);
+
+    final ServiceConnection conn = new ServiceConnection() {
+        @Override public void onServiceConnected(ComponentName n, IBinder b) {
+            service = new Messenger(b);
+            Message m = Message.obtain(null, RunnerService.MSG_RUN);
+            Bundle d = new Bundle();
+            d.putString("dex", dex); d.putString("main", main); d.putString("jars", jars); d.putString("project", project);
+            m.setData(d);
+            m.replyTo = reply;
+            try { service.send(m); } catch (RemoteException e) { add("Cannot start the runner: " + e + "\n", true); }
+        }
+        @Override public void onServiceDisconnected(ComponentName n) {
+            service = null;
+            if (!finished) {
+                finished = true;
+                status.setText(stopping ? "Stopped" : "Ended");
+                add(stopping ? "\n[Stopped]\n" : "\n[Program ended: System.exit() was called, or it crashed]\n", true);
+            }
+        }
+    };
 
     @Override protected void onCreate(Bundle b) {
         super.onCreate(b);
@@ -84,22 +83,15 @@ public class ConsoleActivity extends Activity {
         AppThemes.window(this);
         autoScroll = Prefs.b(this, "console_autoscroll");
         fontSp = Prefs.i(this, "console_font");
-        final String name = getIntent().getStringExtra("name");
-        CrashLog.step(this, "CONSOLE: opening");
-        try {
-            build(name == null ? "Console" : name);
-            startRun();
-        } catch (Throwable t) {
-            java.io.StringWriter sw = new java.io.StringWriter();
-            t.printStackTrace(new java.io.PrintWriter(sw));
-            TextView tv = new TextView(this);
-            tv.setTextColor(0xFFFF6B6B);
-            tv.setTextIsSelectable(true);
-            tv.setPadding(30, 60, 30, 30);
-            tv.setText("Console failed to start:\n\n" + sw);
-            setContentView(new ScrollView(this) {{ addView(tv); }});
-            CrashLog.step(this, "DONE");
-        }
+        dex = getIntent().getStringExtra("dex");
+        main = getIntent().getStringExtra("main");
+        jars = getIntent().getStringExtra("jars");
+        project = getIntent().getStringExtra("projectDir");
+        if (jars == null) jars = "";
+        if (project == null) project = "";
+        String name = getIntent().getStringExtra("name");
+        build(name == null ? "Console" : name);
+        start();
     }
 
     void build(String name) {
@@ -119,6 +111,7 @@ public class ConsoleActivity extends Activity {
         tl.addView(t);
         tl.addView(status);
         bar.addView(tl, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1));
+        bar.addView(iconBtn(R.drawable.ic_refresh, new Runnable() { @Override public void run() { restart(); } }));
         bar.addView(iconBtn(R.drawable.ic_stop, new Runnable() { @Override public void run() { stop(); } }));
         bar.addView(iconBtn(R.drawable.ic_copy, new Runnable() { @Override public void run() { copy(); } }));
         bar.addView(iconBtn(R.drawable.ic_delete, new Runnable() { @Override public void run() { sb.clear(); out.setText(sb); } }));
@@ -162,84 +155,76 @@ public class ConsoleActivity extends Activity {
         return v;
     }
 
+    void start() {
+        finished = false;
+        stopping = false;
+        t0 = System.currentTimeMillis();
+        status.setText("Running…");
+        Intent i = new Intent(this, RunnerService.class);
+        bound = bindService(i, conn, Context.BIND_AUTO_CREATE);
+        if (!bound) add("Cannot start the runner service.\n", true);
+    }
+
+    void restart() {
+        killRunner();
+        sb.setLength(0);
+        out.setText(sb);
+        h.postDelayed(new Runnable() { @Override public void run() { start(); } }, 400);
+    }
+
+    void killRunner() {
+        if (service != null) {
+            try { service.send(Message.obtain(null, RunnerService.MSG_STOP)); } catch (RemoteException ignored) { }
+        }
+        stopping = true;
+        if (bound) {
+            try { unbindService(conn); } catch (Exception ignored) { }
+            bound = false;
+        }
+        service = null;
+    }
+
+    void stop() {
+        if (finished) { finish(); return; }
+        killRunner();
+        finished = true;
+        status.setText("Stopped");
+        add("\n[Stopped]\n", true);
+    }
+
+    @Override protected void onDestroy() {
+        super.onDestroy();
+        killRunner();
+    }
+
     void sendInput() {
         String s = in.getText().toString();
         in.setText("");
-        post("> " + s + "\n", false);
-        stdin.feed(s);
+        add("> " + s + "\n", false);
+        if (service == null) return;
+        Message m = Message.obtain(null, RunnerService.MSG_INPUT);
+        Bundle b = new Bundle();
+        b.putString("t", s);
+        m.setData(b);
+        try { service.send(m); } catch (RemoteException ignored) { }
     }
 
-    void post(String s, boolean err) {
-        synchronized (queue) {
-            queue.add(new Seg(s, err));
-            if (scheduled) return;
-            scheduled = true;
-        }
+    void add(String s, boolean err) {
+        int st = sb.length();
+        sb.append(s);
+        if (err) sb.setSpan(new ForegroundColorSpan(0xFFFF5C5C), st, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        else if (s.startsWith("> ")) sb.setSpan(new ForegroundColorSpan(T.accent), st, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        if (sb.length() > 300000) sb.delete(0, sb.length() - 250000);
+        h.removeCallbacks(flush);
         h.postDelayed(flush, 40);
     }
 
     final Runnable flush = new Runnable() {
         @Override public void run() {
-            ArrayList<Seg> segs;
-            synchronized (queue) { segs = new ArrayList<>(queue); queue.clear(); scheduled = false; }
-            for (Seg s : segs) {
-                int st = sb.length();
-                sb.append(s.s);
-                if (s.err) sb.setSpan(new ForegroundColorSpan(0xFFFF5C5C), st, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-                else if (s.s.startsWith("> ")) sb.setSpan(new ForegroundColorSpan(T.accent), st, sb.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            }
-            if (sb.length() > 300000) sb.delete(0, sb.length() - 250000);
             out.setText(sb);
             if (autoScroll) sv.post(new Runnable() { @Override public void run() { sv.fullScroll(View.FOCUS_DOWN); } });
         }
     };
-
-    void startRun() {
-        final String dex = getIntent().getStringExtra("dex");
-        final String main = getIntent().getStringExtra("main");
-        System.setOut(new PrintStream(new Sink(false), true));
-        System.setErr(new PrintStream(new Sink(true), true));
-        System.setIn(stdin);
-        final Thread.UncaughtExceptionHandler prev = Thread.getDefaultUncaughtExceptionHandler();
-        Thread.setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-            @Override public void uncaughtException(Thread t, Throwable e) {
-                if (t == Looper.getMainLooper().getThread() && prev != null) prev.uncaughtException(t, e);
-                else e.printStackTrace();
-            }
-        });
-        t0 = System.currentTimeMillis();
-        new Thread(new Runnable() {
-            @Override public void run() {
-                try {
-                    CrashLog.step(ConsoleActivity.this, "CONSOLE: loading dex");
-                    DexClassLoader cl = new DexClassLoader(dex, getCodeCacheDir().getAbsolutePath(), null, ConsoleActivity.class.getClassLoader());
-                    Class<?> c = cl.loadClass(main);
-                    Method m = c.getMethod("main", String[].class);
-                    m.invoke(null, (Object) new String[0]);
-                } catch (InvocationTargetException e) {
-                    Throwable c = e.getCause() != null ? e.getCause() : e;
-                    c.printStackTrace();
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
-                final long ms = System.currentTimeMillis() - t0;
-                runOnUiThread(new Runnable() {
-                    @Override public void run() {
-                        finished = true;
-                        CrashLog.step(ConsoleActivity.this, "DONE");
-                        status.setText("Finished");
-                        if (Prefs.b(ConsoleActivity.this, "show_timing")) post("\n[Process finished in " + ms + " ms]\n", false);
-                    }
-                });
-            }
-        }, "javario-main").start();
-    }
-
-    void stop() {
-        if (finished) { finish(); return; }
-        post("\n[Stopped]\n", true);
-        h.postDelayed(new Runnable() { @Override public void run() { Process.killProcess(Process.myPid()); } }, 150);
-    }
 
     void copy() {
         ClipboardManager cm = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
@@ -248,7 +233,7 @@ public class ConsoleActivity extends Activity {
     }
 
     void options() {
-        Dlg.list(this, "Console", new String[]{"Share output", "Bigger text", "Smaller text", autoScroll ? "Turn auto scroll off" : "Turn auto scroll on", "Select all & copy"}, new Dlg.Idx() {
+        Dlg.list(this, "Console", new String[]{"Share output", "Bigger text", "Smaller text", autoScroll ? "Turn auto scroll off" : "Turn auto scroll on", "Copy all"}, new Dlg.Idx() {
             @Override public void run(int i) {
                 if (i == 0) {
                     Intent s = new Intent(Intent.ACTION_SEND);
