@@ -67,6 +67,8 @@ public class ChatView extends LinearLayout {
 
     public static class Msg {
         public String role, text, model;
+        public String reasoning = "";
+        public long start;
         public ArrayList<Att> atts = new ArrayList<>();
         public Msg(String r, String t) { role = r; text = t; }
     }
@@ -440,12 +442,17 @@ public class ChatView extends LinearLayout {
         hd.body.removeAllViews();
         String txt = hd.msg.text;
         if (txt.isEmpty() && !hd.error) {
-            TextView t = UI.text(act, "Thinking…", fontSp, T.sub);
-            if (Prefs.b(act, "animations")) {
-                t.setAlpha(0.4f);
-                t.animate().alpha(1f).setDuration(700).start();
-            }
+            long secs = hd.msg.start == 0 ? 0 : (System.currentTimeMillis() - hd.msg.start) / 1000;
+            TextView t = UI.text(act, "Thinking… " + secs + "s", fontSp, T.sub);
             hd.body.addView(t);
+            String rs = hd.msg.reasoning;
+            if (!rs.isEmpty()) {
+                String tail = rs.length() > 350 ? "…" + rs.substring(rs.length() - 350) : rs;
+                TextView r = UI.text(act, tail.trim(), Math.max(10, fontSp - 2), UI.alpha(T.sub, 200));
+                r.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.ITALIC));
+                r.setPadding(UI.dp(act, 8), UI.dp(act, 4), 0, 0);
+                hd.body.addView(r);
+            }
             return;
         }
         ArrayList<Markdown.Block> bl = Markdown.split(txt);
@@ -571,14 +578,14 @@ public class ChatView extends LinearLayout {
                 Att a = new Att();
                 a.name = bridge.currentName();
                 String t = bridge.currentText();
-                a.text = t.length() > 40000 ? t.substring(0, 40000) : t;
+                a.text = t.length() > 14000 ? t.substring(0, 14000) + "\n// … file truncated for speed" : t;
                 sendAtts.add(0, a);
             }
             String sel = bridge.selectedText();
             if (sel != null && !sel.trim().isEmpty()) {
                 Att a = new Att();
                 a.name = "selected code";
-                a.text = sel.length() > 20000 ? sel.substring(0, 20000) : sel;
+                a.text = sel.length() > 8000 ? sel.substring(0, 8000) : sel;
                 sendAtts.add(a);
             }
         }
@@ -627,7 +634,9 @@ public class ChatView extends LinearLayout {
                 if (tree != null && !tree.isEmpty()) sb.append("\n\nProject files:\n").append(tree);
             }
             String er = bridge.lastErrors();
-            if (er != null && !er.trim().isEmpty()) sb.append("\n\nLatest build / editor errors:\n").append(er.length() > 3500 ? er.substring(0, 3500) : er);
+            boolean hasErrAtt = false;
+            if (!history.isEmpty()) for (Att a : history.get(history.size() - 1).atts) if (a.name != null && a.name.equals("build errors")) hasErrAtt = true;
+            if (!hasErrAtt && er != null && !er.trim().isEmpty()) sb.append("\n\nLatest build / editor errors:\n").append(er.length() > 2000 ? er.substring(0, 2000) : er);
         } else if (!staticErrors.isEmpty()) {
             sb.append("\n\nLatest build errors:\n").append(staticErrors.length() > 3500 ? staticErrors.substring(0, 3500) : staticErrors);
         }
@@ -678,6 +687,8 @@ public class ChatView extends LinearLayout {
             ms.add(m);
         }
         am.model = sel.m.id;
+        am.start = System.currentTimeMillis();
+        tick(hd);
         handle = AiClient.chat(act, sel.p, sel.m.id, systemPrompt(), ms, Prefs.b(act, "ai_stream"), new AiClient.Stream() {
             @Override public void token(final String t) {
                 h.post(new Runnable() {
@@ -688,6 +699,15 @@ public class ChatView extends LinearLayout {
                     }
                 });
             }
+            @Override public void reasoning(final String t) {
+                h.post(new Runnable() {
+                    @Override public void run() {
+                        if (!busy || active != hd) return;
+                        am.reasoning += t;
+                        if (am.text.isEmpty()) schedRender(hd);
+                    }
+                });
+            }
             @Override public void done() {
                 h.post(new Runnable() { @Override public void run() { if (busy && active == hd) finish(hd, null); } });
             }
@@ -695,6 +715,17 @@ public class ChatView extends LinearLayout {
                 h.post(new Runnable() { @Override public void run() { if (busy && active == hd) finish(hd, msg); } });
             }
         });
+    }
+
+    /** Shows how long the model has been thinking (updates every second until the first answer text). */
+    void tick(final Holder hd) {
+        h.postDelayed(new Runnable() {
+            @Override public void run() {
+                if (!busy || active != hd || !hd.msg.text.isEmpty()) return;
+                render(hd);
+                tick(hd);
+            }
+        }, 1000);
     }
 
     void schedRender(final Holder hd) {
@@ -734,7 +765,13 @@ public class ChatView extends LinearLayout {
             scrollDown();
             return;
         }
-        if (hd.msg.text.trim().isEmpty()) hd.msg.text = "_(empty reply)_";
+        if (hd.msg.text.trim().isEmpty() && !hd.msg.reasoning.trim().isEmpty()) {
+            hd.msg.text = "_The model only returned its thinking (it may have run out of tokens). Raise “Max reply length” in Settings or pick another model._\n\n" + hd.msg.reasoning;
+        }
+        if (hd.msg.text.trim().isEmpty()) {
+            finish(hd, "The model returned an empty reply. The free model may be busy. Tap Retry or change the model.");
+            return;
+        }
         history.add(hd.msg);
         render(hd);
         addActions(hd);
@@ -780,7 +817,7 @@ public class ChatView extends LinearLayout {
 
     void addAtt(String name, String text) {
         Att a = new Att();
-        a.name = name; a.text = text.length() > 60000 ? text.substring(0, 60000) : text;
+        a.name = name; a.text = text.length() > 20000 ? text.substring(0, 20000) + "\n… truncated" : text;
         atts.add(a);
         refreshAttBar();
         updateSend();

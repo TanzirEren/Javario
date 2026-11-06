@@ -48,7 +48,7 @@ public class Prefs {
         {"#", "header", "", "Assistant", "", ""},
         {"ai_stream", "switch", "1", "Stream replies", "Show the answer while it is being written", ""},
         {"ai_temperature", "seek", "7", "Creativity", "x0.1 - lower is more exact, higher is more creative", "0:20"},
-        {"ai_max_tokens", "seek", "1500", "Max reply length (tokens)", "", "256:4096"},
+        {"ai_max_tokens", "seek", "3000", "Max reply length (tokens)", "Thinking models also spend tokens on thinking", "256:8000"},
         {"ai_history", "seek", "12", "Chat memory (messages)", "How many earlier messages the model can see", "2:40"},
         {"ai_font", "seek", "13", "Chat text size", "Small text like ChatGPT / Claude", "10:18"},
         {"ai_include_code", "switch", "1", "Send current file in IDE chat", "The open file is attached to your messages (can be turned off in the chat)", ""},

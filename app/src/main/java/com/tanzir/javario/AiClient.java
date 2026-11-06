@@ -20,6 +20,7 @@ import org.json.JSONTokener;
 public class AiClient {
     public interface Stream {
         void token(String t);
+        default void reasoning(String t) { }
         void done();
         void error(String msg);
     }
@@ -224,6 +225,11 @@ public class AiClient {
                 JSONArray ch = j.optJSONArray("choices");
                 if (ch == null || ch.length() == 0) throw new Exception("Empty reply from model");
                 JSONObject msg = ch.getJSONObject(0).optJSONObject("message");
+                if (msg != null) {
+                    String rs = msg.optString("reasoning_content", "");
+                    if (rs.isEmpty() || rs.equals("null")) rs = msg.optString("reasoning", "");
+                    if (!rs.isEmpty() && !rs.equals("null")) cb.reasoning(rs);
+                }
                 if (msg != null && !msg.isNull("content")) {
                     Object cont = msg.get("content");
                     if (cont instanceof JSONArray) {
@@ -235,6 +241,8 @@ public class AiClient {
             }
             BufferedReader r = new BufferedReader(new InputStreamReader(c.getInputStream(), "UTF-8"));
             String line;
+            String finish = "";
+            boolean got = false;
             while ((line = r.readLine()) != null) {
                 if (h.cancelled) break;
                 if (!line.startsWith("data:")) continue;
@@ -249,13 +257,22 @@ public class AiClient {
                 }
                 JSONArray ch = j.optJSONArray("choices");
                 if (ch == null || ch.length() == 0) continue;
-                JSONObject delta = ch.getJSONObject(0).optJSONObject("delta");
-                if (delta != null && !delta.isNull("content")) {
-                    String t = delta.optString("content", "");
-                    if (!t.isEmpty()) cb.token(t);
+                JSONObject c0 = ch.getJSONObject(0);
+                if (!c0.isNull("finish_reason")) finish = c0.optString("finish_reason", "");
+                JSONObject delta = c0.optJSONObject("delta");
+                if (delta != null) {
+                    String rs = delta.isNull("reasoning_content") ? "" : delta.optString("reasoning_content", "");
+                    if (rs.isEmpty()) rs = delta.isNull("reasoning") ? "" : delta.optString("reasoning", "");
+                    if (!rs.isEmpty()) { got = true; cb.reasoning(rs); }
+                    if (!delta.isNull("content")) {
+                        String t = delta.optString("content", "");
+                        if (!t.isEmpty()) { got = true; cb.token(t); }
+                    }
                 }
             }
             r.close();
+            if (!got && !h.cancelled) throw new Exception("The model sent nothing" + (finish.isEmpty() ? "" : " (finish reason: " + finish + ")")
+                + ". The free model may be busy or overloaded. Try again or pick another model.");
             return;
         }
     }
@@ -326,6 +343,7 @@ public class AiClient {
             if (type.equals("content_block_delta")) {
                 JSONObject delta = j.optJSONObject("delta");
                 if (delta != null && "text_delta".equals(delta.optString("type"))) cb.token(delta.optString("text", ""));
+                else if (delta != null && "thinking_delta".equals(delta.optString("type"))) cb.reasoning(delta.optString("thinking", ""));
             } else if (type.equals("message_stop")) break;
         }
         r.close();
